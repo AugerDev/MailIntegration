@@ -36,7 +36,6 @@ namespace MailboxIntegration.Helpers
             try
             {
                 var graphClient = GetAuthenticatedClient();
-                //var events = await graphClient.Me.Messages.Request().GetAsync();
                 var events = await graphClient.Me.MailFolders.Inbox.Messages.Request().Expand("attachments").GetAsync(); //Select("webLink,subject,hasAttachments,BodyPreview")
                 return events.CurrentPage;
             }
@@ -48,6 +47,21 @@ namespace MailboxIntegration.Helpers
 
         }
 
+
+        public static async Task<IEnumerable<Message>> OpenSharedMailbox(string sharedMailId)
+        {
+            try
+            {
+                var graphClient = GetAuthenticatedClient();
+                var user = await graphClient.Users[sharedMailId].MailFolders.Inbox.Messages.Request().Expand("attachments").GetAsync();
+                return user.CurrentPage;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
         public static async Task<IList<Attachment>> DownloadAttachments(string messageId)
         {
             try

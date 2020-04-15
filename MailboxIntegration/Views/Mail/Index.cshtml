@@ -3,111 +3,80 @@
 @{
     ViewBag.Current = "Mail";
 }
-<style>
-    table.table {
-        margin-top: 2%;
-    }
+<div id="result">
 
-    th {
-        font-size: large;
-    }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.css" rel="stylesheet" />
-<h1>Mail List</h1>
-<table class="table">
-    <thead>
-        <tr></tr>
-        <tr>
-            <th scope="col">Subject</th>
-            <th scope="col">Message</th>
-            <th scope="col">Attachments</th>
-            <th scope="col">Download</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Display</td>
-                @*<td>@item.Id</td>*@
-                <td>@item.Message</td>
-                @if (item.Properties.Count > 0)
-                {
-                    <td>
-
-                        <ul>
-                            @foreach (var attachmentItem in item.Properties)
-                            {
-                                <li>
-                                    @Html.Raw(attachmentItem.AttachmentName.ToString())
-                                    @*@Html.ActionLink(attachmentItem.AttachmentName.ToString(), "", "", null, new { onclick = "attachmentDownload('" + item.Id + "','" + item.EmailID +"')" })*@
-                                </li>
-
-                            }
-                        </ul>
-                    </td>
-                    <td style="text-align:center">
-                        @Html.ActionLink(" ", "", "", new { @onclick = "attachmentDownload('" + item.Id + "','" + item.EmailID + "');", @class = "fa fa-lg fa-download", Href = "javascript:void(0)", title = "Download Attachments" })
-                    </td>
-                }
-                else
-                {
-                    <td></td>
-                    <td></td>
-                }
-
-            </tr>
-        }
-    </tbody>
-</table>
+</div>
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.10.11/dist/sweetalert2.all.min.js"></script>
 <script type="text/javascript">
-    function attachmentDownload(messageId, emailId) {
-        var objAttachment = {};
-        objAttachment.Id = messageId;
-        objAttachment.EmailID = emailId;
+    function OpenSharedMailboxPopup(isShow = false) {
+        if (isShow) {
+            Swal.fire({
+                title: 'Open shared mailbox',
+                input: 'email',
+                inputPlaceholder: 'Enter Mail Address',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Open',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+            }).then((result) => {
+                if (result.value) {
+                    getMailboxInformation(result.value);
+                }
+
+            });
+        }
+        else {
+            getMailboxInformation("");
+        }
+
+    }
+
+    function getMailboxInformation(sharedMailId) {
         $.ajax({
-            type: "POST",
-            url: "/Mail/DownLoadAttachment",
-            data: '{mailListDetailItems: ' + JSON.stringify(objAttachment) + '}',
+            type: "GET",
+            url: "/Mail/MailInboxSearch?sharedMailId=" + sharedMailId,
             contentType: "application/json; charset=utf-8",
             dataType: "json",
-            success: function (result) {
-                if (result.status.toLocaleLowerCase() == "ok") {
-                    swal({
-                        text: 'Your attachments downloaded successfully. ',
-                        title: 'Success',
-                        type: 'success',
-                        showConfirmButton: true,
-                        showCancelButton: false,
-                        confirmButtonText: 'OK',
-                        cancelButtonText: '',
-                        animation: true,
-                        allowEscapeKey: false,
-                        confirmButtonColor: '#BDBF37',
-                        cancelButtonColor: '#d33',
-                        //timer: 0,
-                        allowOutsideClick: false
-                    });
-                }
-
+            success: function (response) {
+                $("#result").html(response.view);
             },
-            error: function (req, status, error) {
-                swal({
-                    text: 'Something went wrong',
-                    title: 'Error',
-                    type: 'error',
+            failure: function (response) {
+                 swal.fire({
+                    text: 'Invalid Email Address',
+                    title: 'Failed!',
+                    icon: 'warning',
                     showConfirmButton: true,
                     showCancelButton: false,
                     confirmButtonText: 'OK',
                     cancelButtonText: '',
                     animation: true,
                     allowEscapeKey: false,
-                    confirmButtonColor: '#BDBF37',
-                    cancelButtonColor: '#d33',
                     allowOutsideClick: false
+                 }).then(function () {
+                });
+            },
+            error: function (response) {
+                swal.fire({
+                    text: 'Invalid Email Address',
+                    title: 'Error!',
+                    icon: 'error',
+                    showConfirmButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: '',
+                    animation: true,
+                    allowEscapeKey: false,
+                    allowOutsideClick: false
+                 }).then(function () {
                 });
             }
         });
     }
+    $(document).ready(function () {
+        OpenSharedMailboxPopup();
+    });
 </script>
