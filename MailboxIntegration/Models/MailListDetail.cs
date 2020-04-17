@@ -12,10 +12,10 @@ namespace MailboxIntegration.Models
     public class MailListDetailItems
     {
         public string Display { get; set; }
+        public List<MailCategories> Categories { get; set; }
         public string Id { get; set; }
         public string EmailID { get; set; }
         public string Message { get; set; }
-        //public List<Dictionary<string, object>> Properties { get; set; }
         public List<AttachmentProperties> Properties { get; set; }
     }
 
@@ -25,5 +25,10 @@ namespace MailboxIntegration.Models
         public string AttachmentType { get; set; }
         public int? AttachmentSize { get; set; }
         public string AttachmentId { get; set; }
+    }
+
+    public class MailCategories
+    {
+        public string CategoryName { get; set; }
     }
 }

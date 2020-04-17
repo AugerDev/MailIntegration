@@ -58,7 +58,6 @@ namespace MailboxIntegration.Helpers
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }

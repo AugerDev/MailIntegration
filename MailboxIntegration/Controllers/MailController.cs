@@ -18,19 +18,23 @@ namespace MailboxIntegration.Controllers
         {
             MailListDetail mailList = new MailListDetail();
             var mailListDetail = (dynamic)null;
-            if (!string.IsNullOrEmpty(sharedMailId)){
+            if (!string.IsNullOrEmpty(sharedMailId))
+            {
                 mailListDetail = await GraphHelper.OpenSharedMailbox(sharedMailId);
             }
             else
             {
                 mailListDetail = await GraphHelper.GetEventsAsync();
             }
-          
+
             mailList = GetMessageList(mailListDetail);
 
             return Json(new
             {
-                view = RenderRazorViewToString(ControllerContext, "MailboxView", mailList.Items.ToList()),isValid = true,itemsCount = mailList.Items.ToList()},JsonRequestBehavior.AllowGet); ;
+                view = RenderRazorViewToString(ControllerContext, "MailboxView", mailList.Items.ToList()),
+                isValid = true,
+                itemsCount = mailList.Items.ToList()
+            }, JsonRequestBehavior.AllowGet);
         }
         public static string RenderRazorViewToString(ControllerContext controllerContext, string viewName, object model)
         {
@@ -54,15 +58,16 @@ namespace MailboxIntegration.Controllers
         {
             MailListDetail mailList = new MailListDetail();
             List<AttachmentProperties> attachmentList;
+            List<MailCategories> mailCategoriesList;
             List<MailListDetailItems> items = new List<MailListDetailItems>();
             if (mailListDetail != null)
             {
                 foreach (Message message in mailListDetail)
                 {
                     attachmentList = new List<AttachmentProperties>();
+                    mailCategoriesList = new List<MailCategories>();
                     if (message.Attachments != null)//message.Attachments.Count != 0 && 
                     {
-
                         foreach (var item in message.Attachments.CurrentPage.ToList())
                         {
                             attachmentList.Add(new AttachmentProperties
@@ -74,13 +79,26 @@ namespace MailboxIntegration.Controllers
                             });
                         }
                     }
+                    if (message.Categories != null)
+                    {
+                        foreach (var item in message.Categories.ToList())
+                        {
+                            mailCategoriesList.Add(new MailCategories
+                            {
+                                CategoryName = item
+                            });
+                        }
+                    }
+
+
                     items.Add(new MailListDetailItems
                     {
                         EmailID = message.From.EmailAddress.Address,
                         Display = message.Subject,
                         Id = message.Id,
                         Message = message.BodyPreview,
-                        Properties = attachmentList
+                        Properties = attachmentList,
+                        Categories = mailCategoriesList
                     });
                 }
                 mailList.Items = items;

@@ -4,7 +4,7 @@
     ViewBag.Current = "Mail";
 }
 <style>
-    
+
     th {
         font-size: large;
     }
@@ -50,6 +50,7 @@
             <th scope="col">Subject</th>
             <th scope="col">Message</th>
             <th scope="col">From</th>
+            <th scope="col">Categories</th>
             <th scope="col">Attachments</th>
             <th scope="col">Download</th>
         </tr>
@@ -61,7 +62,20 @@
                 <td>@item.Display</td>
                 <td>@item.Message</td>
                 <td>@item.EmailID</td>
+                @if (item.Categories.Count > 0)
+                {
+                    <td>
+                        <ul>
+                            @foreach (var categoryItem in item.Categories)
+                            {
+                                <li>
+                                    @Html.Raw(categoryItem.CategoryName.ToString())
+                                </li>
 
+                            }
+                        </ul>
+                    </td>
+                }
                 @if (item.Properties.Count > 0)
                 {
                     <td>
