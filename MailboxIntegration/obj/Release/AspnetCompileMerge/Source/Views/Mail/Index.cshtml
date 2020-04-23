@@ -1,0 +1,82 @@
+﻿@model IList<MailboxIntegration.Models.MailListDetailItems>
+
+@{
+    ViewBag.Current = "Mail";
+}
+<div id="result">
+
+</div>
+<script src="~/Scripts/jquery-3.3.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.10.11/dist/sweetalert2.all.min.js"></script>
+<script type="text/javascript">
+    function OpenSharedMailboxPopup(isShow = false) {
+        if (isShow) {
+            Swal.fire({
+                title: 'Open shared mailbox',
+                input: 'email',
+                inputPlaceholder: 'Enter Mail Address',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Open',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: false,
+            }).then((result) => {
+                if (result.value) {
+                    getMailboxInformation(result.value);
+                }
+
+            });
+        }
+        else {
+            getMailboxInformation("");
+        }
+
+    }
+
+    function getMailboxInformation(sharedMailId) {
+        $.ajax({
+            type: "GET",
+            url: "/Mail/MailInboxSearch?sharedMailId=" + sharedMailId,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                $("#result").html(response.view);
+            },
+            failure: function (response) {
+                 swal.fire({
+                    text: 'Invalid Email Address',
+                    title: 'Failed!',
+                    icon: 'warning',
+                    showConfirmButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: '',
+                    animation: true,
+                    allowEscapeKey: false,
+                    allowOutsideClick: false
+                 }).then(function () {
+                });
+            },
+            error: function (response) {
+                swal.fire({
+                    text: 'Invalid Email Address',
+                    title: 'Error!',
+                    icon: 'error',
+                    showConfirmButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: '',
+                    animation: true,
+                    allowEscapeKey: false,
+                    allowOutsideClick: false
+                 }).then(function () {
+                });
+            }
+        });
+    }
+    $(document).ready(function () {
+        OpenSharedMailboxPopup();
+    });
+</script>

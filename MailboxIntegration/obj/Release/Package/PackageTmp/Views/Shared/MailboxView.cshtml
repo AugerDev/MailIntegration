@@ -1,0 +1,155 @@
+﻿@model IList<MailboxIntegration.Models.MailListDetailItems>
+
+@{
+    ViewBag.Current = "Mail";
+}
+<style>
+
+    th {
+        font-size: large;
+    }
+
+    input {
+        max-width: 100% !important;
+    }
+
+    .sa-button-container {
+        float: right;
+    }
+
+    .btnOpenSharedMail {
+        float: right;
+        padding-bottom: 1%;
+        padding-top: 1%;
+    }
+
+    a.btnOpenSharedMail.btn.btn-primary.btn-large {
+        font-weight: bold;
+    }
+
+    .row {
+        display: flex;
+    }
+
+    .column {
+        flex: 50%;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.10.11/dist/sweetalert2.all.min.js"></script>
+<div class="row">
+    <div class="column">
+        <h1>Mail List</h1>
+    </div>
+    <div class="column">
+        @Html.ActionLink("Open shared mail", "", "", new { @onclick = "OpenSharedMailboxPopup(true);", @class = "btnOpenSharedMail btn btn-primary btn-large", Href = "javascript:void(0)" })
+    </div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Subject</th>
+            <th scope="col">Message</th>
+            <th scope="col">From</th>
+            <th scope="col">Categories</th>
+            <th scope="col">Attachments</th>
+            <th scope="col">Download</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Display</td>
+                <td>@item.Message</td>
+                <td>@item.EmailID</td>
+                @if (item.Categories.Count > 0)
+                {
+                    <td>
+                        <ul>
+                            @foreach (var categoryItem in item.Categories)
+                            {
+                                <li>
+                                    @Html.Raw(categoryItem.CategoryName.ToString())
+                                </li>
+
+                            }
+                        </ul>
+                    </td>
+                }
+                @if (item.Properties.Count > 0)
+                {
+                    <td>
+
+                        <ul>
+                            @foreach (var attachmentItem in item.Properties)
+                            {
+                                <li>
+                                    @Html.Raw(attachmentItem.AttachmentName.ToString())
+                                    @*@Html.ActionLink(attachmentItem.AttachmentName.ToString(), "", "", null, new { onclick = "attachmentDownload('" + item.Id + "','" + item.EmailID +"')" })*@
+                                </li>
+
+                            }
+                        </ul>
+                    </td>
+                    <td style="text-align:center">
+                        @Html.ActionLink(" ", "", "", new { @onclick = "attachmentDownload('" + item.Id + "','" + item.EmailID + "');", @class = "fa fa-lg fa-download", Href = "javascript:void(0)", title = "Download Attachments" })
+                    </td>
+                }
+                else
+                {
+                    <td></td>
+                    <td></td>
+                }
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    function attachmentDownload(messageId, emailId) {
+        var objAttachment = {};
+        objAttachment.Id = messageId;
+        objAttachment.EmailID = emailId;
+        $.ajax({
+            type: "POST",
+            url: "/Mail/DownLoadAttachment",
+            data: '{mailListDetailItems: ' + JSON.stringify(objAttachment) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                if (result.status.toLocaleLowerCase() == "ok") {
+                    swal.fire({
+                        text: 'Your attachments downloaded successfully. ',
+                        title: 'Success',
+                        icon: 'success',
+                        showConfirmButton: true,
+                        showCancelButton: false,
+                        confirmButtonText: 'OK',
+                        cancelButtonText: '',
+                        animation: true,
+                        allowEscapeKey: false,
+                        allowOutsideClick: false
+                    });
+                }
+
+            },
+            error: function (req, status, error) {
+                swal.fire({
+                    text: 'Something went wrong',
+                    title: 'Error',
+                    icon: 'error',
+                    showConfirmButton: true,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: '',
+                    animation: true,
+                    allowEscapeKey: false,
+                    allowOutsideClick: false
+                });
+            }
+        });
+    }
+
+</script>
+

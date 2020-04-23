@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Current = "Home";
+}
+
+<div class="jumbotron">
+    @*<h1>MailBox Integration</h1>*@
+    @if (Request.IsAuthenticated)
+    {
+        <h4>Welcome @ViewBag.User.DisplayName!</h4>
+    }
+    else
+    {
+        <div>
+            Application for integrating the mail box.
+        </div>
+        @Html.ActionLink("Click here to sign in", "SignIn", "Account", new { area = "" }, new { @class = "btn btn-primary btn-large" })
+
+    }
+</div>
